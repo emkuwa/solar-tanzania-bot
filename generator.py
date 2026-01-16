@@ -4,7 +4,7 @@ import json
 DIST = "dist"
 
 def main():
-    print("Creating dist folder...")
+    print("📁 Creating dist folder...")
     os.makedirs(DIST, exist_ok=True)
 
     companies = [
@@ -20,14 +20,13 @@ def main():
         }
     ]
 
-    print("Writing companies.json...")
+    print("📝 Writing companies.json...")
     with open(os.path.join(DIST, "companies.json"), "w", encoding="utf-8") as f:
         json.dump(companies, f, indent=2, ensure_ascii=False)
 
-    print("Writing index.html...")
+    print("📝 Writing index.html...")
     with open(os.path.join(DIST, "index.html"), "w", encoding="utf-8") as f:
-        f.write("""
-<!DOCTYPE html>
+        f.write("""<!DOCTYPE html>
 <html>
 <head>
   <title>Solar Tanzania Test</title>
@@ -47,10 +46,9 @@ def main():
       });
   </script>
 </body>
-</html>
-""")
+</html>""")
 
-    print("DONE. companies.json and index.html created.")
+    print("✅ DONE: dist/index.html and dist/companies.json created")
 
 if __name__ == "__main__":
     main()
