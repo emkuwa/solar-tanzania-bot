@@ -50,7 +50,7 @@ def fetch_solar_companies():
     ]
     """
 
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("models/gemini-1.5-flash-latest")
     response = model.generate_content(prompt)
 
     # Gemini wakati mwingine hurudisha ```json ... ```
