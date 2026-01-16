@@ -1,62 +1,110 @@
 import google.generativeai as genai
 import os
+import shutil
 import random
 import time
 
-# 1. SETUP API KEY (Inasoma kutoka GitHub Secrets)
+# 1. SETUP - Inasoma Key kutoka GitHub Secrets
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-if not os.path.exists('dist'):
-    os.makedirs('dist')
+# Futa folder la 'dist' kama lipo na litengeneze upya ili kufuta sample za zamani
+if os.path.exists('dist'):
+    shutil.rmtree('dist')
+os.makedirs('dist')
 
 colors = ["#f4b400", "#2e7d32", "#1565c0", "#c62828", "#6a1b9a", "#ef6c00"]
 
-# 2. AI RESEARCH: Gemini inatafuta makampuni yenyewe
-def ai_research_companies():
-    print("🔍 Gemini inafanya utafiti wa makampuni ya solar Tanzania...")
-    prompt = """Nipe orodha ya makampuni 10 ya solar yanayofanya kazi Tanzania. 
-    Kwa kila kampuni nipe: Jina, Mkoa ilipo, na huduma moja wanayotoa. 
-    Format: Jina | Mkoa | Huduma. Usiweke maneno mengine."""
+# 2. AI RESEARCH - Gemini inatafuta makampuni halisi
+def pata_makampuni_halisi():
+    print("🔍 Gemini inatafuta makampuni halisi ya solar Tanzania...")
+    prompt = """Orodhesha makampuni 10 makubwa na halisi ya nishati ya jua (solar) yanayofanya kazi Tanzania.
+    Nipe majibu katika mfumo huu pekee: Jina la Kampuni | Mkoa | Huduma kuu.
+    Mfano: Rex Energy | Dar es Salaam | Solar Power Plants"""
     
     try:
         response = model.generate_content(prompt)
-        raw_data = response.text.strip().split('\n')
-        companies = []
-        for line in raw_data:
-            if '|' in line:
-                parts = line.split('|')
-                companies.append({
-                    "name": parts[0].strip(),
-                    "location": parts[1].strip(),
-                    "specialty": parts[2].strip()
+        mistari = response.text.strip().split('\n')
+        data = []
+        for mstari in mistari:
+            if '|' in mstari:
+                pande = mstari.split('|')
+                data.append({
+                    "name": pande[0].strip(),
+                    "location": pande[1].strip(),
+                    "specialty": pande[2].strip()
                 })
-        return companies
+        return data
     except Exception as e:
-        print(f"Hitilafu ya AI: {e}")
+        print(f"Hitilafu: {e}")
         return []
 
-# ... (Hapa weka zile function za get_html_template na generate_ai_content nilizokupa awali)
+def get_html_template(title, location, body, color):
+    return f"""
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Huduma za Solar Tanzania</title>
+    <style>
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: auto; padding: 20px; background-color: #f4f7f6; }}
+        .header {{ background: {color}; color: white; padding: 40px 20px; text-align: center; border-radius: 10px; }}
+        .content {{ background: white; padding: 30px; margin-top: -20px; border-radius: 10px; shadow: 0 4px 6px rgba(0,0,0,0.1); }}
+        .back-link {{ display: inline-block; margin-bottom: 20px; color: {color}; text-decoration: none; font-weight: bold; }}
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Rudi Kwenye Orodha</a>
+    <div class="header">
+        <h1>{title}</h1>
+        <p>Eneo: {location}</p>
+    </div>
+    <div class="content">{body}</div>
+</body>
+</html>
+"""
 
-# 3. RUN THE BOT
-makampuni = ai_research_companies()
+# 3. MAIN PROCESS
+makampuni = pata_makampuni_halisi()
 links_for_home = []
 
 for co in makampuni:
     name = co['name']
-    safe_name = name.lower().replace(' ', '_').replace('.', '').strip()
-    links_for_home.append({"name": name, "url": f"{safe_name}.html"})
+    # Tengeneza jina la file lisilo na nafasi
+    file_name = name.lower().replace(' ', '_').replace('.', '').replace('/', '_') + ".html"
+    links_for_home.append({"name": name, "location": co['location'], "url": file_name})
     
-    # Gemini inaandika maelezo marefu
-    prompt_maelezo = f"Andika makala ya maneno 200 kwa Kiswahili kuhusu kampuni ya solar inayoitwa {name} iliyopo {co['location']}. Elezea umuhimu wao katika nishati mbadala."
-    content = model.generate_content(prompt_maelezo).text
+    print(f"✍️ Inatengeneza ukurasa wa: {name}...")
+    prompt_maudhui = f"Andika makala ndefu ya maneno 250 kuhusu kampuni ya {name} iliyopo {co['location']}. Elezea huduma zao za {co['specialty']} na umuhimu wao kwa wateja wa Tanzania. Tumia Kiswahili sanifu."
     
-    # Tengeneza HTML file
-    color = random.choice(colors)
-    # (Hapa script itatumia template yako kutengeneza file la HTML kwenye /dist)
-    with open(f"dist/{safe_name}.html", 'w', encoding='utf-8') as f:
-        # Fupi kwa ajili ya mfano, tumia template yako kamili hapa
-        f.write(f"<html><body style='font-family:sans-serif;'><h1>{name}</h1><p>{content}</p></body></html>")
+    try:
+        content_ai = model.generate_content(prompt_maudhui).text.replace('\n', '<py><br>')
+        rangi = random.choice(colors)
+        
+        with open(f"dist/{file_name}", "w", encoding="utf-8") as f:
+            f.write(get_html_template(name, co['location'], content_ai, rangi))
+        time.sleep(2) # Kuzuia overload ya API
+    except:
+        continue
 
-# ... (Tengeneza index.html kama kawaida)
+# 4. TENGENEZA HOME PAGE (INDEX.HTML)
+cards = "".join([f'<div style="background:white; padding:20px; border-radius:8px; margin:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1);"><a href="{i["url"]}" style="text-decoration:none; color:#2c3e50;"><h3>{i["name"]}</h3><p>📍 {i["location"]}</p></a></div>' for i in links_for_home])
+
+index_html = f"""
+<html>
+<head><title>Solar Companies Tanzania</title></head>
+<body style="font-family:sans-serif; background:#eef2f3; padding:40px; text-align:center;">
+    <h1>Orodha ya Makampuni ya Solar Tanzania</h1>
+    <p>Pata wataalamu wa nishati ya jua karibu nawe</p>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); max-width:1000px; margin:auto;">
+        {cards}
+    </div>
+</body>
+</html>
+"""
+with open("dist/index.html", "w", encoding="utf-8") as f:
+    f.write(index_html)
+
+print("✅ Kazi imekamilika! Website mpya imetengenezwa.")
