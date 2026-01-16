@@ -24,7 +24,8 @@ try:
         if '|' in line:
             name, loc = line.split('|')
             name, loc = name.strip(), loc.strip()
-            file_name = f"{name.replace(' ', '_').lower()}.html"
+            # Tengeneza jina la file kwa herufi ndogo na bila nafasi
+            file_name = name.lower().replace(' ', '_').replace('.', '') + ".html"
             
             # Card ya ukurasa wa mwanzo
             html_cards += f'''
@@ -33,9 +34,10 @@ try:
                 <p style="margin:5px 0 0; color:#666;">📍 {loc}</p>
             </a>'''
             
-            # Kurasa za kampuni binafsi
+            # Kurasa za kampuni binafsi - Tumetenganisha f-string ili kuepuka makosa
+            content = f"<html><body style='font-family:sans-serif; padding:40px;'><h1>{name}</h1><p>Hii ni kampuni ya solar inayopatikana {loc}.</p><a href='index.html'>Rudi Nyumbani</a></body></html>"
             with open(f"dist/{file_name}", "w", encoding="utf-8") as f:
-                f.write(f"<html><body style='font-family:sans-serif; padding:40px;'><h1>{name}</h1><p>Hii ni kampuni ya solar inayopatikana {loc}.</p><a href='index.html'>Rudi Nyumbani</a></body></html>")
+                f.write(content)
 
     # 3. Tengeneza Index.html
     index_html = f'''
@@ -56,7 +58,7 @@ try:
     '''
     with open("dist/index.html", "w", encoding="utf-8") as f:
         f.write(index_html)
-    print("✅ Kazi imekamilika!")
+    print("✅ Kazi imekamilika! Website yako imetengenezwa.")
 
 except Exception as e:
     print(f"❌ Hitilafu: {e}")
