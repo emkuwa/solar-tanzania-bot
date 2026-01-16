@@ -24,6 +24,12 @@ def save(path, content):
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)
 
+def save_companies_json(companies):
+    path = os.path.join(DIST_FOLDER, "companies.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(companies, f, ensure_ascii=False, indent=2)
+    print(f"💾 companies.json saved at {path}")
+
 # =============================
 # FIND WORKING MODEL
 # =============================
@@ -40,7 +46,7 @@ def get_working_model():
 # =============================
 def fetch_solar_companies():
     prompt = """
-Generate a list of 25 real Solar Energy companies operating in Tanzania.
+Generate a list of 30 real Solar Energy companies operating in Tanzania.
 Include big brands and small local suppliers who may not have websites.
 Respond ONLY in JSON format like this:
 
@@ -50,7 +56,7 @@ Respond ONLY in JSON format like this:
     "location": "City or Region",
     "services": "Solar installation, panels, batteries, inverters",
     "description": "Short professional description",
-    "website": "https://example.com or 'N/A'",
+    "website": "https://example.com or N/A",
     "phone": "07XXXXXXXX"
   }
 ]
@@ -61,74 +67,112 @@ Respond ONLY in JSON format like this:
     response = model.generate_content(prompt)
 
     text = response.text.strip().replace("```json", "").replace("```", "")
-    return json.loads(text)
+    companies = json.loads(text)
+    return companies
 
 # =============================
-# HTML + UI
+# HTML + UI ASSETS
 # =============================
 def generate_assets():
     css = """
-:root {
+:root{
   --green:#16a34a;
   --blue:#2563eb;
   --bg:#f9fafb;
   --dark:#1f2937;
 }
+*{box-sizing:border-box;}
 body{
-  font-family: Arial, sans-serif;
+  font-family:Arial,sans-serif;
   background:var(--bg);
   margin:0;
+  color:var(--dark);
 }
 header{
   background:white;
-  padding:15px 30px;
+  padding:15px;
   border-bottom:3px solid var(--green);
   display:flex;
   justify-content:space-between;
+  align-items:center;
 }
-header h1{color:var(--green);}
-.container{padding:30px;}
+header h1{color:var(--green);margin:0;font-size:20px;}
+.container{padding:15px;max-width:1100px;margin:auto;}
 .search{
   padding:12px;
   width:100%;
-  max-width:400px;
-  margin-bottom:20px;
+  border:1px solid #ddd;
+  border-radius:6px;
+  margin-bottom:15px;
 }
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:20px;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:15px;
 }
 .card{
   background:white;
   padding:15px;
-  border-radius:8px;
-  box-shadow:0 2px 5px rgba(0,0,0,.1);
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
 }
-.card h3{color:var(--blue);}
+.card h3{color:var(--blue);margin-top:0;}
+.card p{font-size:14px;}
 .whatsapp{
   display:inline-block;
   background:#25D366;
   color:white;
-  padding:8px 12px;
-  border-radius:5px;
+  padding:10px 14px;
+  border-radius:6px;
   text-decoration:none;
+  font-weight:bold;
 }
 .ad{
   background:#e5e7eb;
   text-align:center;
   padding:20px;
   margin:20px 0;
+  border-radius:8px;
+  font-weight:bold;
+}
+.footer{
+  text-align:center;
+  padding:20px;
+  font-size:13px;
+  color:#555;
 }
 """
 
     js = """
-function filterCards(){
-  let q=document.getElementById("search").value.toLowerCase();
-  document.querySelectorAll(".card").forEach(c=>{
-    let text=c.innerText.toLowerCase();
-    c.style.display=text.includes(q)?"block":"none";
+let companiesData = [];
+
+fetch("companies.json")
+  .then(res => res.json())
+  .then(data => {
+    companiesData = data;
+    renderCompanies(data);
   });
+
+function renderCompanies(data){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  data.forEach((c, i) => {
+    grid.innerHTML += `
+    <div class="card">
+      <h3>${c.name}</h3>
+      <p><b>Location:</b> ${c.location}</p>
+      <p>${c.description}</p>
+      <a href="company_${i+1}.html">View Profile →</a>
+    </div>`;
+  });
+}
+
+function filterCards(){
+  let q = document.getElementById("search").value.toLowerCase();
+  let filtered = companiesData.filter(c =>
+    (c.name + c.location + c.services + c.description).toLowerCase().includes(q)
+  );
+  renderCompanies(filtered);
 }
 """
 
@@ -138,25 +182,13 @@ function filterCards(){
 # =============================
 # INDEX PAGE
 # =============================
-def generate_index(companies):
-    cards=""
-    for i,c in enumerate(companies):
-        cards+=f"""
-<div class="card">
-  <h3>{c['name']}</h3>
-  <p><b>Location:</b> {c['location']}</p>
-  <p>{c['description']}</p>
-  <a href="company_{i+1}.html">View Profile</a>
-</div>
-"""
-
-    html=f"""
+def generate_index():
+    html = f"""
 <!DOCTYPE html>
 <html>
 <head>
-<title>Solar Tanzania Directory</title>
-<link rel="stylesheet" href="assets/style.css">
-<script src="assets/script.js"></script>
+  <title>Solar Tanzania Directory</title>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 <header>
@@ -169,12 +201,16 @@ def generate_index(companies):
 
   <div class="ad">ADVERTISEMENT SPACE</div>
 
-  <div class="grid">
-    {cards}
-  </div>
+  <div id="grid" class="grid"></div>
 
   <div class="ad">ADVERTISEMENT SPACE</div>
 </div>
+
+<div class="footer">
+© 2026 Solar Tanzania – Powered by AI
+</div>
+
+<script src="assets/script.js"></script>
 </body>
 </html>
 """
@@ -185,7 +221,7 @@ def generate_index(companies):
 # =============================
 def generate_company_pages(companies):
     for i,c in enumerate(companies):
-        html=f"""
+        html = f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -222,11 +258,14 @@ def main():
     print("🤖 Fetching companies...")
     companies = fetch_solar_companies()
 
+    print("💾 Saving companies.json...")
+    save_companies_json(companies)
+
     print("🎨 Creating UI assets...")
     generate_assets()
 
     print("📄 Creating index...")
-    generate_index(companies)
+    generate_index()
 
     print("🏢 Creating company pages...")
     generate_company_pages(companies)
