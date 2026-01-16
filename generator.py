@@ -25,13 +25,27 @@ def save_file(path, content):
         f.write(content)
 
 # -----------------------------
+# MODEL DISCOVERY
+# -----------------------------
+def get_working_model():
+    """
+    Hii inatafuta model halisi inayopatikana kwenye account yako
+    na inayounga mkono generateContent.
+    """
+    print("🔍 Searching for available Gemini models...")
+    models = genai.list_models()
+
+    for m in models:
+        if "generateContent" in m.supported_generation_methods:
+            print(f"✅ Using model: {m.name}")
+            return m.name
+
+    raise Exception("❌ Hakuna model yoyote inayounga mkono generateContent kwenye API key yako.")
+
+# -----------------------------
 # AI PART
 # -----------------------------
 def fetch_solar_companies():
-    """
-    Tunaiambia Gemini itoe JSON safi.
-    API version yako inatambua model: models/gemini-pro
-    """
     prompt = """
     Nipe orodha ya makampuni 6 ya Solar Energy Tanzania.
     Jibu lazima liwe JSON pekee, bila maelezo mengine, kwa muundo huu:
@@ -46,16 +60,16 @@ def fetch_solar_companies():
     ]
     """
 
-    # HII NDIO MODEL SAHIHI KWA API YAKO
-    model = genai.GenerativeModel("models/gemini-pro")
+    model_name = get_working_model()
+    model = genai.GenerativeModel(model_name)
+
     response = model.generate_content(prompt)
 
     text = response.text.strip()
     text = text.replace("```json", "").replace("```", "").strip()
 
     try:
-        companies = json.loads(text)
-        return companies
+        return json.loads(text)
     except json.JSONDecodeError:
         print("❌ Gemini amerudisha JSON isiyo sahihi:")
         print(text)
@@ -79,35 +93,14 @@ def generate_index_html(companies):
     html = f"""<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Solar Companies in Tanzania</title>
-    <style>
-        body {{
-            font-family: Arial, sans-serif;
-            margin: 40px;
-        }}
-        h1 {{
-            color: #2c7a2c;
-        }}
-        ul {{
-            list-style: none;
-            padding: 0;
-        }}
-        li {{
-            margin: 10px 0;
-        }}
-        a {{
-            text-decoration: none;
-            color: #1a4fa3;
-        }}
-    </style>
+<meta charset="UTF-8">
+<title>Solar Companies in Tanzania</title>
 </head>
 <body>
-    <h1>Solar Companies in Tanzania</h1>
-    <p>List of solar energy companies generated automatically using AI.</p>
-    <ul>
-        {list_items}
-    </ul>
+<h1>Solar Companies in Tanzania</h1>
+<ul>
+{list_items}
+</ul>
 </body>
 </html>
 """
@@ -120,54 +113,35 @@ def generate_company_pages(companies):
         html = f"""<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>{company["name"]}</title>
-    <style>
-        body {{
-            font-family: Arial, sans-serif;
-            margin: 40px;
-        }}
-        h1 {{
-            color: #2c7a2c;
-        }}
-        a {{
-            color: #1a4fa3;
-        }}
-    </style>
+<meta charset="UTF-8">
+<title>{company["name"]}</title>
 </head>
 <body>
-    <h1>{company["name"]}</h1>
-    <p><strong>Location:</strong> {company["location"]}</p>
-    <p><strong>Description:</strong> {company["description"]}</p>
-    <p><strong>Website:</strong>
-        <a href="{company["website"]}" target="_blank">
-            {company["website"]}
-        </a>
-    </p>
-
-    <p><a href="index.html">← Back to Home</a></p>
+<h1>{company["name"]}</h1>
+<p><b>Location:</b> {company["location"]}</p>
+<p><b>Description:</b> {company["description"]}</p>
+<p><b>Website:</b> <a href="{company["website"]}" target="_blank">{company["website"]}</a></p>
+<p><a href="index.html">Back</a></p>
 </body>
 </html>
 """
         save_file(os.path.join(DIST_FOLDER, filename), html)
 
 # -----------------------------
-# MAIN FLOW
+# MAIN
 # -----------------------------
 def main():
     print("📁 Creating dist folder...")
     ensure_dist_folder()
 
-    print("🤖 Fetching solar companies from Gemini...")
+    print("🤖 Fetching companies from Gemini...")
     companies = fetch_solar_companies()
 
-    print("📝 Generating index.html...")
+    print("📝 Generating HTML...")
     generate_index_html(companies)
-
-    print("📄 Generating company pages...")
     generate_company_pages(companies)
 
-    print("✅ Website generation completed successfully!")
+    print("✅ Done! Website generated successfully.")
 
 if __name__ == "__main__":
     main()
