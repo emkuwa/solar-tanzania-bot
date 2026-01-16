@@ -1,6 +1,5 @@
 import os
 import json
-import requests
 import google.generativeai as genai
 
 # -----------------------------
@@ -14,7 +13,6 @@ if not GEMINI_API_KEY:
 
 genai.configure(api_key=GEMINI_API_KEY)
 
-
 # -----------------------------
 # UTILITY FUNCTIONS
 # -----------------------------
@@ -22,19 +20,17 @@ def ensure_dist_folder():
     if not os.path.exists(DIST_FOLDER):
         os.makedirs(DIST_FOLDER)
 
-
 def save_file(path, content):
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)
-
 
 # -----------------------------
 # AI PART
 # -----------------------------
 def fetch_solar_companies():
     """
-    Tunaiambia Gemini itoe data katika JSON safi
-    ili iwe rahisi kusoma na Python.
+    Tunaiambia Gemini itoe JSON safi.
+    API version yako inatambua model: models/gemini-pro
     """
     prompt = """
     Nipe orodha ya makampuni 6 ya Solar Energy Tanzania.
@@ -50,21 +46,20 @@ def fetch_solar_companies():
     ]
     """
 
-    model = genai.GenerativeModel("models/gemini-1.5-flash-latest")
+    # HII NDIO MODEL SAHIHI KWA API YAKO
+    model = genai.GenerativeModel("models/gemini-pro")
     response = model.generate_content(prompt)
 
-    # Gemini wakati mwingine hurudisha ```json ... ```
     text = response.text.strip()
     text = text.replace("```json", "").replace("```", "").strip()
 
     try:
         companies = json.loads(text)
         return companies
-    except json.JSONDecodeError as e:
-        print("Failed to parse Gemini JSON response:")
+    except json.JSONDecodeError:
+        print("❌ Gemini amerudisha JSON isiyo sahihi:")
         print(text)
-        raise e
-
+        raise
 
 # -----------------------------
 # HTML GENERATION
@@ -118,7 +113,6 @@ def generate_index_html(companies):
 """
     save_file(os.path.join(DIST_FOLDER, "index.html"), html)
 
-
 def generate_company_pages(companies):
     for i, company in enumerate(companies):
         filename = f"company_{i+1}.html"
@@ -157,25 +151,23 @@ def generate_company_pages(companies):
 """
         save_file(os.path.join(DIST_FOLDER, filename), html)
 
-
 # -----------------------------
 # MAIN FLOW
 # -----------------------------
 def main():
-    print("Creating dist folder...")
+    print("📁 Creating dist folder...")
     ensure_dist_folder()
 
-    print("Fetching solar companies from Gemini...")
+    print("🤖 Fetching solar companies from Gemini...")
     companies = fetch_solar_companies()
 
-    print("Generating index.html...")
+    print("📝 Generating index.html...")
     generate_index_html(companies)
 
-    print("Generating company pages...")
+    print("📄 Generating company pages...")
     generate_company_pages(companies)
 
-    print("Website generation completed successfully!")
-
+    print("✅ Website generation completed successfully!")
 
 if __name__ == "__main__":
     main()
