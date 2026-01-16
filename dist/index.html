@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Solar Tanzania – Clean Energy Directory</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/script.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>☀️ Solar Tanzania</h1>
+  <div>
+    <button onclick="setLanguage('en')">EN</button>
+    <button onclick="setLanguage('sw')">SW</button>
+  </div>
+</header>
+
+<section class="hero">
+  <h2 data-en="Find Trusted Solar Companies in Tanzania"
+      data-sw="Pata Makampuni Bora ya Nishati ya Jua Tanzania">
+    Find Trusted Solar Companies in Tanzania
+  </h2>
+
+  <p data-en="Search suppliers, installers and solar experts near you."
+     data-sw="Tafuta wauzaji na wataalamu wa sola karibu na wewe.">
+    Search suppliers, installers and solar experts near you.
+  </p>
+
+  <input
+    type="text"
+    id="search"
+    placeholder="Search by company, location, or service..."
+    onkeyup="filterCards()">
+</section>
+
+<!-- AD SPACE -->
+<div class="ad-space">
+  <p>Advertise here – Promote your solar business</p>
+</div>
+
+<section class="directory" id="directory">
+
+  <!-- SAMPLE CARD (Generator will replace these dynamically later) -->
+  <div class="card"
+       data-name="Offgrid Africa"
+       data-location="Dar es Salaam"
+       data-services="solar panels batteries inverters installation">
+    <h3>Offgrid Africa</h3>
+    <p>📍 Dar es Salaam</p>
+    <p>⚡ Off-grid solar systems, lithium batteries, installations</p>
+    <a href="company_1.html">View Profile →</a>
+  </div>
+
+</section>
+
+<!-- SOLAR CALCULATOR -->
+<section class="calculator">
+  <h2 data-en="Solar Cost Estimator"
+      data-sw="Kikokotoo cha Makadirio ya Gharama za Sola">
+    Solar Cost Estimator
+  </h2>
+
+  <p data-en="Estimate basic solar setup cost"
+     data-sw="Kadiria gharama ya mfumo rahisi wa sola">
+    Estimate basic solar setup cost
+  </p>
+
+  <label>
+    Power Needed (Watts):
+    <input type="number" id="watts" placeholder="e.g 500">
+  </label>
+
+  <label>
+    Hours per day:
+    <input type="number" id="hours" placeholder="e.g 6">
+  </label>
+
+  <button onclick="calculateSolar()">Calculate</button>
+
+  <p id="result"></p>
+</section>
+
+<footer>
+  <p>© 2026 Solar Tanzania – Powered by AI</p>
+</footer>
+
+<script>
+function calculateSolar() {
+  const watts = document.getElementById("watts").value;
+  const hours = document.getElementById("hours").value;
+
+  if (!watts || !hours) {
+    document.getElementById("result").innerText = "Please fill all fields.";
+    return;
+  }
+
+  const dailyWh = watts * hours;
+  const panelCost = Math.ceil(dailyWh / 300) * 250000; 
+  const batteryCost = Math.ceil(dailyWh / 1000) * 600000;
+
+  const total = panelCost + batteryCost;
+
+  document.getElementById("result").innerText =
+    `Estimated Cost: TZS ${total.toLocaleString()}`;
+}
+</script>
+
+</body>
+</html>
