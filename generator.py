@@ -92,5 +92,12 @@ def main():
     generate_index()
     print("✅ Static Solar Tanzania site generated")
 
+def generate_companies_json(companies):
+    path = os.path.join(DIST_FOLDER, "companies.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(companies, f, indent=2, ensure_ascii=False)
+    print("📦 companies.json created")
+
+
 if __name__ == "__main__":
     main()
