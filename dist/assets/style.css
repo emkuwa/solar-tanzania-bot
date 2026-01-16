@@ -1,125 +1,89 @@
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
-  font-family: system-ui, sans-serif;
 }
 
 body {
-  background: #ffffff;
-  color: #1f2933;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f9fafb;
+  color: #111;
 }
 
-/* Header */
-.header {
-  display: flex;
-  justify-content: space-between;
-  padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.logo {
-  font-weight: bold;
-  color: #2e7d32;
-}
-
-.lang-switch button {
-  border: none;
-  background: #f1f5f9;
-  padding: 6px 10px;
-  border-radius: 6px;
-}
-
-.lang-switch .active {
-  background: #2e7d32;
+header {
+  background: linear-gradient(135deg, #15803d, #22c55e);
   color: white;
-}
-
-/* Hero */
-.hero {
-  padding: 32px 16px;
+  padding: 20px;
   text-align: center;
 }
 
-.hero h1 {
-  font-size: 1.8rem;
-  margin-bottom: 10px;
+header h1 {
+  margin: 0;
+  font-size: 1.6rem;
 }
 
-.hero p {
-  color: #555;
-  margin-bottom: 20px;
+header p {
+  margin: 5px 0 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
 }
 
-.search-box input {
+main {
+  padding: 15px;
+}
+
+.search {
   width: 100%;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid #ddd;
+  font-size: 1rem;
   margin-bottom: 15px;
 }
 
-/* Buttons */
-.primary-btn {
-  background: #2e7d32;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-size: 1rem;
-}
-
-/* Companies */
-.companies {
-  padding: 20px 16px;
+.grid {
   display: grid;
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 15px;
 }
 
 .card {
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 16px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .card h3 {
-  color: #2e7d32;
-  margin-bottom: 4px;
+  margin-top: 0;
+  color: #15803d;
 }
 
 .card p {
   font-size: 0.9rem;
-  color: #444;
+  line-height: 1.4;
 }
 
-/* Advertise */
-.advertise {
-  background: #f0fdf4;
-  padding: 24px 16px;
-  text-align: center;
+.actions {
+  margin-top: 10px;
 }
 
-/* Calculator */
-.calculator {
-  padding: 24px 16px;
-}
-
-.calc-form {
-  display: grid;
-  gap: 10px;
-}
-
-.calc-form input {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-/* Footer */
-footer {
-  padding: 20px;
-  text-align: center;
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #16a34a;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
   font-size: 0.85rem;
-  color: #555;
+}
+
+.btn:hover {
+  background: #15803d;
+}
+
+/* Desktop upgrade */
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
