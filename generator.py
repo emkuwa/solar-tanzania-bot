@@ -1,120 +1,66 @@
 import os
 import json
-import google.generativeai as genai
 
-# =============================
-# CONFIG
-# =============================
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-DIST_FOLDER = "dist"
+DIST = "dist"
 
-if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY haijawekwa kwenye GitHub Secrets")
-
-genai.configure(api_key=GEMINI_API_KEY)
-
-# =============================
-# UTILS
-# =============================
 def ensure_dist():
-    os.makedirs(DIST_FOLDER, exist_ok=True)
-    os.makedirs(f"{DIST_FOLDER}/assets", exist_ok=True)
+    os.makedirs(DIST, exist_ok=True)
+    os.makedirs(f"{DIST}/assets", exist_ok=True)
 
 def save(path, content):
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)
 
-# =============================
-# FIND WORKING MODEL (HII IKO HAPA, KABLA YA KUITWA)
-# =============================
-def get_working_model():
-    print("🔍 Searching available Gemini models...")
-    for m in genai.list_models():
-        if "generateContent" in m.supported_generation_methods:
-            print("✅ Using model:", m.name)
-            return m.name
-    raise Exception("No compatible Gemini model found for this API key.")
+def generate_companies_json():
+    companies = [
+        {
+            "name": "Offgrid Africa",
+            "location": "Dar es Salaam",
+            "services": "Solar installation, lithium batteries",
+            "description": "Leading off-grid solar provider in Tanzania.",
+            "phone": "+255716002790"
+        },
+        {
+            "name": "Zanzibar Green Power",
+            "location": "Zanzibar",
+            "services": "Solar hotels, resorts, backup systems",
+            "description": "Premium solar solutions for tourism sector.",
+            "phone": "+255712000111"
+        }
+    ]
+    save(f"{DIST}/companies.json", json.dumps(companies, indent=2))
 
-# =============================
-# FETCH SOLAR COMPANIES
-# =============================
-def fetch_solar_companies():
-    prompt = """
-Generate a list of 40 solar companies operating in Tanzania.
-Include large companies and small local installers.
-
-Return STRICT JSON only:
-
-[
-  {
-    "name": "Company Name",
-    "location": "City or Region",
-    "services": "Solar installation, panels, batteries, inverters",
-    "description": "Short professional description",
-    "website": "https://example.com or N/A",
-    "phone": "07XXXXXXXX"
-  }
-]
-"""
-
-    model_name = get_working_model()
-    model = genai.GenerativeModel(model_name)
-    response = model.generate_content(prompt)
-
-    text = response.text.strip()
-    text = text.replace("```json", "").replace("```", "")
-
-    return json.loads(text)
-
-# =============================
-# UI ASSETS
-# =============================
 def generate_assets():
     css = """
-body{margin:0;font-family:Arial;background:#f5f7fa;}
-header{background:#16a34a;color:white;padding:18px;text-align:center;}
-.search{padding:12px;width:100%;border:1px solid #ddd;border-radius:6px;}
-.container{padding:15px;}
-.card{background:white;padding:12px;border-radius:8px;margin-bottom:12px;box-shadow:0 2px 4px rgba(0,0,0,.1);}
-.card h3{margin:0;color:#2563eb;}
-.whatsapp{background:#25D366;color:white;padding:6px 10px;border-radius:5px;text-decoration:none;}
+body{font-family:sans-serif;background:#f9fafb;margin:0}
+header{background:#16a34a;color:white;padding:15px;text-align:center}
+.card{background:white;padding:15px;margin:10px;border-radius:8px}
 """
-
     js = """
 fetch("companies.json")
 .then(r=>r.json())
 .then(data=>{
-  window.companies=data;
-  render(data);
-})
-.catch(()=>document.getElementById("list").innerHTML="Failed to load companies.json");
-
-function render(data){
-  let html="";
+  const box=document.getElementById("companies");
   data.forEach(c=>{
-    html+=`
-    <div class="card">
+    const div=document.createElement("div");
+    div.className="card";
+    div.innerHTML=`
       <h3>${c.name}</h3>
       <p><b>${c.location}</b></p>
+      <p>${c.services}</p>
       <p>${c.description}</p>
-      <a class="whatsapp" href="https://wa.me/255716002790">WhatsApp</a>
-    </div>`;
+      <p>${c.phone}</p>
+    `;
+    box.appendChild(div);
   });
-  document.getElementById("list").innerHTML=html;
-}
-
-function search(){
-  let q=document.getElementById("search").value.toLowerCase();
-  let f=window.companies.filter(c=>JSON.stringify(c).toLowerCase().includes(q));
-  render(f);
-}
+})
+.catch(e=>{
+  document.getElementById("error").innerText="Failed to load companies.json";
+});
 """
-    save(f"{DIST_FOLDER}/assets/style.css", css)
-    save(f"{DIST_FOLDER}/assets/script.js", js)
+    save(f"{DIST}/assets/style.css", css)
+    save(f"{DIST}/assets/script.js", js)
 
-# =============================
-# INDEX
-# =============================
 def generate_index():
     html = """
 <!DOCTYPE html>
@@ -125,39 +71,26 @@ def generate_index():
 </head>
 <body>
 <header>
-  <h1>☀ Solar Tanzania</h1>
-  <p>Find Trusted Solar Companies in Tanzania</p>
+<h2>☀ Solar Tanzania</h2>
+<p>Find Trusted Solar Companies in Tanzania</p>
 </header>
 
-<div class="container">
-  <input id="search" class="search" placeholder="Search company or city" onkeyup="search()">
-  <div id="list">Loading companies...</div>
-</div>
+<p id="error" style="color:red;text-align:center;"></p>
+
+<div id="companies"></div>
 
 <script src="assets/script.js"></script>
 </body>
 </html>
 """
-    save(f"{DIST_FOLDER}/index.html", html)
+    save(f"{DIST}/index.html", html)
 
-# =============================
-# MAIN
-# =============================
 def main():
-    print("📁 Preparing dist...")
     ensure_dist()
-
-    print("🤖 Fetching companies...")
-    companies = fetch_solar_companies()
-
-    print("💾 Saving companies.json...")
-    save(f"{DIST_FOLDER}/companies.json", json.dumps(companies, indent=2))
-
-    print("🎨 Creating UI...")
+    generate_companies_json()
     generate_assets()
     generate_index()
-
-    print("✅ Solar Tanzania generated successfully!")
+    print("✅ Static Solar Tanzania site generated")
 
 if __name__ == "__main__":
     main()
