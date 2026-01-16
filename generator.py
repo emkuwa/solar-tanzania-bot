@@ -16,9 +16,8 @@ def generate_companies_json():
         {
             "name": "Zanzibar Solar Solutions",
             "location": "Zanzibar",
-            "services": "Solar installation, batteries, inverters",
+            "services": "Installation, batteries, inverters",
             "description": "Reliable solar energy provider in Zanzibar.",
-            "website": "N/A",
             "phone": "0712345678"
         },
         {
@@ -26,8 +25,14 @@ def generate_companies_json():
             "location": "Dar es Salaam",
             "services": "Panels, installation, maintenance",
             "description": "Affordable solar systems for homes and businesses.",
-            "website": "N/A",
             "phone": "0755555555"
+        },
+        {
+            "name": "Mwanza Sun Power",
+            "location": "Mwanza",
+            "services": "Solar water pumps, home systems",
+            "description": "Solar solutions for agriculture and homes.",
+            "phone": "0766666666"
         }
     ]
 
@@ -35,28 +40,59 @@ def generate_companies_json():
     with open(path, "w", encoding="utf-8") as f:
         json.dump(companies, f, indent=2, ensure_ascii=False)
 
-    print("✅ companies.json created successfully")
+    print("✅ companies.json created")
 
 def generate_assets():
     css = """
-body{font-family:Arial;background:#f5f5f5;margin:0}
-header{background:#16a34a;color:white;padding:20px;text-align:center}
-#companies{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;padding:20px}
-.card{background:white;padding:15px;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f5f5;
+}
+header{
+  background:#16a34a;
+  color:white;
+  padding:20px;
+  text-align:center;
+}
+#companies{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:15px;
+  padding:20px;
+}
+.card{
+  background:white;
+  padding:15px;
+  border-radius:8px;
+  box-shadow:0 2px 4px rgba(0,0,0,.1);
+}
+.card h3{
+  margin-top:0;
+  color:#2563eb;
+}
 """
     js = """
 fetch("companies.json")
-.then(r=>r.json())
-.then(data=>{
-  const c=document.getElementById("companies");
-  data.forEach(x=>{
-    const d=document.createElement("div");
-    d.className="card";
-    d.innerHTML=`<h3>${x.name}</h3><p>${x.location}</p><p>${x.description}</p><p>${x.phone}</p>`;
-    c.appendChild(d);
-  })
+.then(r => r.json())
+.then(data => {
+  const box = document.getElementById("companies");
+  data.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <h3>${c.name}</h3>
+      <p><b>Location:</b> ${c.location}</p>
+      <p><b>Services:</b> ${c.services}</p>
+      <p>${c.description}</p>
+      <p><b>Phone:</b> ${c.phone}</p>
+    `;
+    box.appendChild(div);
+  });
 })
-.catch(()=>document.getElementById("error").innerText="Failed to load companies.json");
+.catch(() => {
+  document.getElementById("error").innerText = "Failed to load companies.json";
+});
 """
     save(f"{DIST_FOLDER}/assets/style.css", css)
     save(f"{DIST_FOLDER}/assets/script.js", js)
@@ -71,11 +107,11 @@ def generate_index():
 </head>
 <body>
 <header>
-<h1>☀ Solar Tanzania</h1>
-<p>Find Trusted Solar Companies in Tanzania</p>
+  <h1>☀ Solar Tanzania</h1>
+  <p>Find Trusted Solar Companies in Tanzania</p>
 </header>
 
-<p id="error" style="color:red;text-align:center"></p>
+<p id="error" style="color:red;text-align:center;"></p>
 <div id="companies"></div>
 
 <script src="assets/script.js"></script>
@@ -89,7 +125,7 @@ def main():
     generate_companies_json()
     generate_assets()
     generate_index()
-    print("🚀 Static site generated")
+    print("🚀 Static Solar Tanzania site generated successfully")
 
 if __name__ == "__main__":
     main()
