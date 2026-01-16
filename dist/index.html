@@ -1,31 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Solar Tanzania Directory</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="assets/style.css">
+<title>Solar Tanzania</title>
+<link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-
 <header>
   <h1>☀ Solar Tanzania</h1>
   <p>Find Trusted Solar Companies in Tanzania</p>
 </header>
 
-<main>
-  <input 
-    type="text" 
-    id="search" 
-    class="search" 
-    placeholder="Search company, city or service..."
-    onkeyup="filterCompanies()"
-  >
-
-  <div id="companies" class="grid">
-    <!-- Cards zinaingia hapa kutoka script.js -->
-  </div>
-</main>
+<div class="container">
+  <input id="search" class="search" placeholder="Search company or city" onkeyup="search()">
+  <div id="list">Loading companies...</div>
+</div>
 
 <script src="assets/script.js"></script>
 </body>
