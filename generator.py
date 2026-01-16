@@ -6,68 +6,61 @@ import google.generativeai as genai
 # CONFIG
 # =============================
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-DIST_FOLDER = "dist"
+DIST = "dist"
 
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY haijawekwa kwenye GitHub Secrets")
 
 genai.configure(api_key=GEMINI_API_KEY)
 
+
 # =============================
 # UTILS
 # =============================
 def ensure_dist():
-    os.makedirs(DIST_FOLDER, exist_ok=True)
-    os.makedirs(f"{DIST_FOLDER}/assets", exist_ok=True)
+    os.makedirs(DIST, exist_ok=True)
+    os.makedirs(f"{DIST}/assets", exist_ok=True)
 
 def save(path, content):
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)
 
-# =============================
-# FIND WORKING MODEL
-# =============================
-def get_working_model():
-    print("🔍 Searching Gemini models...")
-    for m in genai.list_models():
-        if "generateContent" in m.supported_generation_methods:
-            print("✅ Using model:", m.name)
-            return m.name
-    raise Exception("Hakuna model ya Gemini inayopatikana.")
 
 # =============================
-# FETCH SOLAR COMPANIES
+# MODEL
+# =============================
+def get_model():
+    for m in genai.list_models():
+        if "generateContent" in m.supported_generation_methods:
+            print("Using:", m.name)
+            return genai.GenerativeModel(m.name)
+    raise Exception("Hakuna model ya Gemini")
+
+
+# =============================
+# FETCH COMPANIES
 # =============================
 def fetch_solar_companies():
     prompt = """
-Generate a list of 30 real Solar companies in Tanzania.
-Include installers, suppliers, solar shops, battery dealers.
-Return ONLY valid JSON.
+Generate a JSON list of 30 real solar companies in Tanzania.
+Include installers, suppliers, shops, distributors.
+Return only JSON:
 
-Format:
 [
   {
     "name": "",
     "location": "",
     "services": "",
     "description": "",
-    "website": "",
     "phone": ""
   }
 ]
 """
-    model = genai.GenerativeModel(get_working_model())
-    response = model.generate_content(prompt)
-    text = response.text.replace("```json", "").replace("```", "").strip()
+    model = get_model()
+    res = model.generate_content(prompt)
+    text = res.text.replace("```json","").replace("```","").strip()
     return json.loads(text)
 
-# =============================
-# SAVE JSON
-# =============================
-def save_companies_json(companies):
-    path = f"{DIST_FOLDER}/companies.json"
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(companies, f, ensure_ascii=False, indent=2)
 
 # =============================
 # ASSETS
@@ -76,40 +69,132 @@ def generate_assets():
     css = """
 body{
   margin:0;
-  font-family:system-ui;
-  background:#f9fafb;
+  font-family:system-ui, sans-serif;
+  background:#f8fafc;
 }
 header{
-  background:#15803d;
+  padding:16px;
+  background:#0f172a;
   color:white;
-  padding:15px;
-  text-align:center;
+}
+.hero{
+  padding:20px;
 }
 .search{
   width:100%;
   padding:12px;
-  border:1px solid #ddd;
-  border-radius:8px;
-  margin:15px 0;
+  border-radius:10px;
+  border:1px solid #ccc;
+  margin-bottom:15px;
 }
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  grid-template-columns:1fr;
   gap:15px;
 }
 .card{
   background:white;
-  border-radius:10px;
   padding:15px;
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
 }
-.card h3{color:#15803d}
+.card h3{margin:0;color:#0f172a}
+.btn{
+  display:inline-block;
+  background:#22c55e;
+  color:white;
+  padding:8px 12px;
+  border-radius:6px;
+  text-decoration:none;
+  font-size:14px;
+}
 """
+
     js = """
-async function loadCompanies() {
-  const res = await fetch("companies.json");
-  const companies = await res.json();
-  const container = document.getElementById("companies");
-  container.innerHTML = "";
-  companies.forEach((c, i) => {
-    const card = document.createElement("div
+fetch("companies.json")
+.then(r=>r.json())
+.then(data=>{
+  window.companies=data;
+  render(data);
+});
+
+function render(list){
+  let grid=document.getElementById("grid");
+  grid.innerHTML="";
+  list.forEach(c=>{
+    grid.innerHTML+=`
+    <div class="card">
+      <h3>${c.name}</h3>
+      <p>${c.location}</p>
+      <p>${c.services}</p>
+      <p>${c.description}</p>
+      <a class="btn" href="https://wa.me/255${c.phone.replace(/^0/,'')}">WhatsApp</a>
+    </div>`;
+  });
+}
+
+function filter(){
+  let q=document.getElementById("search").value.toLowerCase();
+  render(companies.filter(c=>
+    c.name.toLowerCase().includes(q) ||
+    c.location.toLowerCase().includes(q) ||
+    c.services.toLowerCase().includes(q)
+  ));
+}
+"""
+    save(f"{DIST}/assets/style.css", css)
+    save(f"{DIST}/assets/script.js", js)
+
+
+# =============================
+# INDEX
+# =============================
+def generate_index():
+    html = """<!DOCTYPE html>
+<html>
+<head>
+<title>Solar Tanzania</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header>
+  <h2>☀ Solar Tanzania</h2>
+</header>
+
+<div class="hero">
+  <h3>Find Solar Companies, Shops & Suppliers</h3>
+  <input id="search" class="search" placeholder="Search..." onkeyup="filter()">
+  <div id="grid" class="grid"></div>
+</div>
+
+<script src="assets/script.js"></script>
+</body>
+</html>
+"""
+    save(f"{DIST}/index.html", html)
+
+
+# =============================
+# MAIN
+# =============================
+def main():
+    print("📁 Preparing dist...")
+    ensure_dist()
+
+    print("🤖 Fetching companies...")
+    companies = fetch_solar_companies()
+
+    print("💾 Saving companies.json")
+    save(f"{DIST}/companies.json", json.dumps(companies, indent=2))
+
+    print("🎨 Creating UI assets...")
+    generate_assets()
+
+    print("📄 Creating index.html...")
+    generate_index()
+
+    print("✅ DONE: Mobile-first Solar Tanzania Directory generated!")
+
+if __name__ == "__main__":
+    main()
