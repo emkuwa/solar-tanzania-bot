@@ -25,12 +25,23 @@ def save(path, content):
         f.write(content)
 
 # =============================
-# FETCH COMPANIES
+# FIND WORKING MODEL (HII IKO HAPA, KABLA YA KUITWA)
+# =============================
+def get_working_model():
+    print("🔍 Searching available Gemini models...")
+    for m in genai.list_models():
+        if "generateContent" in m.supported_generation_methods:
+            print("✅ Using model:", m.name)
+            return m.name
+    raise Exception("No compatible Gemini model found for this API key.")
+
+# =============================
+# FETCH SOLAR COMPANIES
 # =============================
 def fetch_solar_companies():
     prompt = """
 Generate a list of 40 solar companies operating in Tanzania.
-Include big companies and small local installers.
+Include large companies and small local installers.
 
 Return STRICT JSON only:
 
