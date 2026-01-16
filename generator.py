@@ -29,30 +29,30 @@ def save(path, content):
 # =============================
 def fetch_solar_companies():
     prompt = """
-Generate 30 real Solar companies operating in Tanzania.
-Include installers, suppliers, shops and solar technicians.
+Generate a list of 40 solar companies operating in Tanzania.
+Include big companies and small local installers.
 
-Return ONLY valid JSON:
+Return STRICT JSON only:
 
 [
   {
     "name": "Company Name",
-    "location": "City",
-    "services": "Installation, Panels, Batteries",
+    "location": "City or Region",
+    "services": "Solar installation, panels, batteries, inverters",
     "description": "Short professional description",
-    "phone": "0716002790"
+    "website": "https://example.com or N/A",
+    "phone": "07XXXXXXXX"
   }
 ]
 """
-    def get_working_model():
-    print("🔍 Searching available Gemini models...")
-    for m in genai.list_models():
-        if "generateContent" in m.supported_generation_methods:
-            print("✅ Using model:", m.name)
-            return m.name
-    raise Exception("No compatible Gemini model found for this API key.")
+
+    model_name = get_working_model()
+    model = genai.GenerativeModel(model_name)
     response = model.generate_content(prompt)
-    text = response.text.replace("```json","").replace("```","").strip()
+
+    text = response.text.strip()
+    text = text.replace("```json", "").replace("```", "")
+
     return json.loads(text)
 
 # =============================
