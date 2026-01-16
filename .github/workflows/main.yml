@@ -23,7 +23,6 @@ jobs:
       - name: Run Generator
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
         run: python generator.py
 
       - name: Deploy to Netlify
