@@ -1,45 +1,27 @@
-let allCompanies = [];
+fetch("companies.json")
+.then(r=>r.json())
+.then(data=>{
+  window.companies=data;
+  render(data);
+})
+.catch(()=>document.getElementById("list").innerHTML="Failed to load companies.json");
 
-async function loadCompanies() {
-  try {
-    const res = await fetch("companies.json");
-    allCompanies = await res.json();
-    renderCompanies(allCompanies);
-  } catch (e) {
-    document.getElementById("companies").innerHTML =
-      "<p style='color:red'>Failed to load companies.json</p>";
-  }
-}
-
-function renderCompanies(companies) {
-  const container = document.getElementById("companies");
-  container.innerHTML = "";
-
-  companies.forEach((c, i) => {
-    const card = document.createElement("div");
-    card.className = "card";
-
-    card.innerHTML = `
+function render(data){
+  let html="";
+  data.forEach(c=>{
+    html+=`
+    <div class="card">
       <h3>${c.name}</h3>
-      <p><strong>Location:</strong> ${c.location}</p>
+      <p><b>${c.location}</b></p>
       <p>${c.description}</p>
-      <div class="actions">
-        <a href="company_${i + 1}.html" class="btn">View Profile</a>
-      </div>
-    `;
-
-    container.appendChild(card);
+      <a class="whatsapp" href="https://wa.me/255716002790">WhatsApp</a>
+    </div>`;
   });
+  document.getElementById("list").innerHTML=html;
 }
 
-function filterCompanies() {
-  const q = document.getElementById("search").value.toLowerCase();
-  const filtered = allCompanies.filter(c =>
-    (c.name + c.location + c.services + c.description)
-      .toLowerCase()
-      .includes(q)
-  );
-  renderCompanies(filtered);
+function search(){
+  let q=document.getElementById("search").value.toLowerCase();
+  let f=window.companies.filter(c=>JSON.stringify(c).toLowerCase().includes(q));
+  render(f);
 }
-
-document.addEventListener("DOMContentLoaded", loadCompanies);
