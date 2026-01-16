@@ -44,7 +44,13 @@ Return ONLY valid JSON:
   }
 ]
 """
-    model = genai.GenerativeModel("models/gemini-1.5-flash")
+    def get_working_model():
+    print("🔍 Searching available Gemini models...")
+    for m in genai.list_models():
+        if "generateContent" in m.supported_generation_methods:
+            print("✅ Using model:", m.name)
+            return m.name
+    raise Exception("No compatible Gemini model found for this API key.")
     response = model.generate_content(prompt)
     text = response.text.replace("```json","").replace("```","").strip()
     return json.loads(text)
