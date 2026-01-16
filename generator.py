@@ -30,8 +30,8 @@ def generate_companies_json():
         {
             "name": "Mwanza Sun Power",
             "location": "Mwanza",
-            "services": "Solar water pumps, home systems",
-            "description": "Solar solutions for agriculture and homes.",
+            "services": "Solar pumps, home solar systems",
+            "description": "Solar energy for agriculture and households.",
             "phone": "0766666666"
         }
     ]
@@ -40,59 +40,46 @@ def generate_companies_json():
     with open(path, "w", encoding="utf-8") as f:
         json.dump(companies, f, indent=2, ensure_ascii=False)
 
-    print("✅ companies.json created")
+    print("✅ companies.json created inside dist/")
 
 def generate_assets():
     css = """
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f5f5f5;
-}
-header{
-  background:#16a34a;
-  color:white;
-  padding:20px;
-  text-align:center;
-}
-#companies{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:15px;
-  padding:20px;
-}
-.card{
-  background:white;
-  padding:15px;
-  border-radius:8px;
-  box-shadow:0 2px 4px rgba(0,0,0,.1);
-}
-.card h3{
-  margin-top:0;
-  color:#2563eb;
-}
+body{font-family:Arial;margin:0;background:#f5f5f5}
+header{background:#16a34a;color:white;padding:20px;text-align:center}
+#list{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;padding:20px}
+.card{background:white;padding:15px;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+.whatsapp{background:#25D366;color:white;padding:6px 10px;border-radius:4px;text-decoration:none}
 """
     js = """
 fetch("companies.json")
-.then(r => r.json())
-.then(data => {
-  const box = document.getElementById("companies");
-  data.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      <h3>${c.name}</h3>
-      <p><b>Location:</b> ${c.location}</p>
-      <p><b>Services:</b> ${c.services}</p>
-      <p>${c.description}</p>
-      <p><b>Phone:</b> ${c.phone}</p>
-    `;
-    box.appendChild(div);
-  });
+.then(r=>r.json())
+.then(data=>{
+  window.companies=data;
+  render(data);
 })
-.catch(() => {
-  document.getElementById("error").innerText = "Failed to load companies.json";
+.catch(()=>{
+  document.getElementById("list").innerHTML="Failed to load companies.json";
 });
+
+function render(data){
+  let html="";
+  data.forEach(c=>{
+    html+=`
+    <div class="card">
+      <h3>${c.name}</h3>
+      <p><b>${c.location}</b></p>
+      <p>${c.description}</p>
+      <a class="whatsapp" href="https://wa.me/255${c.phone.replace(/^0/,'')}">WhatsApp</a>
+    </div>`;
+  });
+  document.getElementById("list").innerHTML=html;
+}
+
+function search(){
+  let q=document.getElementById("search").value.toLowerCase();
+  let f=window.companies.filter(c=>JSON.stringify(c).toLowerCase().includes(q));
+  render(f);
+}
 """
     save(f"{DIST_FOLDER}/assets/style.css", css)
     save(f"{DIST_FOLDER}/assets/script.js", js)
@@ -106,13 +93,15 @@ def generate_index():
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
+
 <header>
   <h1>☀ Solar Tanzania</h1>
   <p>Find Trusted Solar Companies in Tanzania</p>
 </header>
 
-<p id="error" style="color:red;text-align:center;"></p>
-<div id="companies"></div>
+<input id="search" placeholder="Search..." onkeyup="search()" style="width:90%;margin:10px;padding:10px">
+
+<div id="list">Loading...</div>
 
 <script src="assets/script.js"></script>
 </body>
@@ -125,7 +114,7 @@ def main():
     generate_companies_json()
     generate_assets()
     generate_index()
-    print("🚀 Static Solar Tanzania site generated successfully")
+    print("🚀 Solar Tanzania static site generated")
 
 if __name__ == "__main__":
     main()
