@@ -1,122 +1,125 @@
-:root {
-  --green: #2E7D32;
-  --blue: #1565C0;
-  --light-green: #E8F5E9;
-  --light-blue: #E3F2FD;
-  --gray: #F5F5F5;
-  --dark: #263238;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, sans-serif;
 }
 
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: var(--gray);
-  color: var(--dark);
+  background: #ffffff;
+  color: #1f2933;
 }
 
-header {
-  background: white;
-  padding: 15px 30px;
+/* Header */
+.header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  border-bottom: 2px solid var(--light-green);
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-header h1 {
-  color: var(--green);
-  margin: 0;
+.logo {
+  font-weight: bold;
+  color: #2e7d32;
 }
 
 .lang-switch button {
   border: none;
-  background: var(--blue);
+  background: #f1f5f9;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.lang-switch .active {
+  background: #2e7d32;
   color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 5px;
 }
 
-.controls {
-  padding: 20px;
-  background: white;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+/* Hero */
+.hero {
+  padding: 32px 16px;
+  text-align: center;
 }
 
-.controls input,
-.controls select {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.hero h1 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
 }
 
-.grid {
+.hero p {
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  margin-bottom: 15px;
+}
+
+/* Buttons */
+.primary-btn {
+  background: #2e7d32;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 1rem;
+}
+
+/* Companies */
+.companies {
+  padding: 20px 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
-  padding: 20px;
+  gap: 16px;
 }
 
 .card {
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  display: flex;
-  flex-direction: column;
-}
-
-.card img {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-}
-
-.card-content {
-  padding: 15px;
-  flex: 1;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 .card h3 {
-  color: var(--green);
-  margin-top: 0;
+  color: #2e7d32;
+  margin-bottom: 4px;
 }
 
-.badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  color: white;
-  margin-right: 5px;
+.card p {
+  font-size: 0.9rem;
+  color: #444;
 }
 
-.badge.verified { background: var(--green); }
-.badge.featured { background: var(--blue); }
-.badge.small { background: #F9A825; }
+/* Advertise */
+.advertise {
+  background: #f0fdf4;
+  padding: 24px 16px;
+  text-align: center;
+}
 
-.card-buttons {
-  display: flex;
-  justify-content: space-between;
+/* Calculator */
+.calculator {
+  padding: 24px 16px;
+}
+
+.calc-form {
+  display: grid;
+  gap: 10px;
+}
+
+.calc-form input {
   padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
 
-.card-buttons a {
-  text-decoration: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  color: white;
-  font-size: 14px;
+/* Footer */
+footer {
+  padding: 20px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #555;
 }
-
-.view-btn {
-  background: var(--blue);
-}
-
-.whatsapp-btn {
-  background: #25D366;
-}
-
