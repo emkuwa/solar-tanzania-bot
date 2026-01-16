@@ -92,19 +92,29 @@ for co in makampuni:
 # 4. TENGENEZA HOME PAGE (INDEX.HTML)
 cards = "".join([f'<div style="background:white; padding:20px; border-radius:8px; margin:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1);"><a href="{i["url"]}" style="text-decoration:none; color:#2c3e50;"><h3>{i["name"]}</h3><p>📍 {i["location"]}</p></a></div>' for i in links_for_home])
 
-index_html = f"""
+# Hifadhi hii sehemu ya mwisho kabisa ya generator.py
+index_content = f"""
+<!DOCTYPE html>
 <html>
-<head><title>Solar Companies Tanzania</title></head>
-<body style="font-family:sans-serif; background:#eef2f3; padding:40px; text-align:center;">
+<head>
+    <title>Solar Tanzania</title>
+    <style>
+        body {{ font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f4; }}
+        .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1000px; margin: auto; }}
+        .card {{ background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-decoration: none; color: #333; }}
+    </style>
+</head>
+<body>
     <h1>Orodha ya Makampuni ya Solar Tanzania</h1>
-    <p>Pata wataalamu wa nishati ya jua karibu nawe</p>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); max-width:1000px; margin:auto;">
-        {cards}
-    </div>
-</body>
-</html>
+    <div class="grid">
 """
+
+for link in links_for_home:
+    index_content += f'<a href="{link["url"]}" class="card"><h3>{link["name"]}</h3><p>📍 {link["location"]}</p></a>'
+
+index_content += "</div></body></html>"
+
 with open("dist/index.html", "w", encoding="utf-8") as f:
-    f.write(index_html)
+    f.write(index_content)
 
 print("✅ Kazi imekamilika! Website mpya imetengenezwa.")
